@@ -14,20 +14,26 @@ The Gentlemen uses XChaCha20 stream encryption with X25519 ECDH key exchange. Ea
 
 We broke the implementation.
 
-Go's runtime does not zero cryptographic key material on goroutine stacks after use. During active encryption, every ephemeral X25519 private key persists in process memory. By capturing a full memory dump of the ransomware process during encryption, we recover the private keys and decrypt every file.
+Go's runtime does not zero cryptographic key material on goroutine stacks or heap after use. Every ephemeral X25519 private key persists in process memory for the **entire lifetime of the ransomware process** — not just during encryption, but from the moment the Go crypto module initializes until the process terminates. Go's garbage collector copies data between heap generations, creating multiple copies of each key across the process address space.
 
-**Results: 35/35 files decrypted with 100% accuracy.**
+A single memory dump taken **at any point while the process is alive** — before, during, or after encryption — contains all the keys needed to decrypt every file.
+
+**Results: 35/35 files decrypted with 100% accuracy. All 35 keys recovered in 0.6 seconds from a single memory dump.**
 
 ---
 
 ## For Victims
 
-If you've been hit by The Gentlemen ransomware, you may be able to recover your files if:
+If you've been hit by The Gentlemen ransomware, you may be able to recover your files if you have a process memory dump from any point during the ransomware's execution. The keys persist for the **entire process lifetime**, not just during active encryption.
 
-1. **Your EDR/XDR captured process memory** before the ransomware terminated (CrowdStrike, SentinelOne, Carbon Black, and others often do this automatically)
-2. **Your IT team took a process dump** before killing the ransomware process
-3. **Your system has Windows crash dumps** or Error Reporting data from the ransomware process
-4. **The system was not rebooted** after encryption (RAM contents may still be recoverable)
+**Where memory dumps come from:**
+
+1. **EDR/XDR solutions** — CrowdStrike, SentinelOne, Carbon Black, Microsoft Defender for Endpoint, and others routinely capture process memory as part of threat detection. Check your EDR console for memory captures or forensic snapshots from the incident.
+2. **Incident response** — if your IR team used `procdump`, Task Manager "Create dump file", or any forensic tool to capture the ransomware process before killing it.
+3. **Windows Error Reporting** — if the ransomware crashed, Windows may have saved a dump in `C:\ProgramData\Microsoft\Windows\WER\`.
+4. **Crash dumps** — check `C:\Windows\Minidump\` and `C:\Windows\MEMORY.DMP` for kernel-mode crash data.
+5. **Full RAM capture** — if a forensic image of system RAM was taken before the machine was rebooted (using tools like WinPmem, Magnet RAM Capture, or FTK Imager).
+6. **Hibernation file** — `C:\hiberfil.sys` contains a RAM snapshot if the system hibernated instead of shutting down.
 
 ### Recovery Steps
 
