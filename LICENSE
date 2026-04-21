@@ -1,0 +1,29 @@
+﻿Business Source License 1.1
+
+License text copyright (c) 2024 MariaDB plc, All Rights Reserved.
+"Business Source License" is a trademark of MariaDB plc.
+
+Parameters
+
+Licensor:             Bedrock Safeguard Inc.
+Licensed Work:        Gentlemen Decryptor
+                      The Licensed Work is (c) 2026 Bedrock Safeguard Inc.
+Additional Use Grant: You may use the Licensed Work for any non-commercial
+                      purpose, internal business use, academic research,
+                      incident response, and victim recovery purposes
+                      regardless of commercial status.
+                      You may NOT resell, rebrand, or offer the Licensed
+                      Work as a commercial product or managed service.
+Change Date:          2030-04-21
+Change License:       Apache License, Version 2.0
+
+Notice
+
+The Business Source License (this document, or the "License") is not an Open
+Source license. However, the Licensed Work will eventually be made available
+under an Open Source License, as stated in this License.
+
+For more information on the use of this License, please refer to:
+https://mariadb.com/bsl11/
+
+Full license terms: https://mariadb.com/bsl-faq-adopting/
