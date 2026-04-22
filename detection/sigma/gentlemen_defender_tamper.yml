@@ -1,0 +1,40 @@
+title: The Gentlemen Ransomware — Defender Tampering
+id: 2c9a4d3b-8e55-4a7b-a7a0-c14e6e2f3b22
+status: experimental
+description: |
+  The Gentlemen ransomware adds its binary to Windows Defender's process
+  exclusion list via Add-MpPreference before execution. This rule detects
+  the PowerShell command pattern regardless of the specific file name.
+author: Bedrock Safeguard Inc.
+date: 2026-04-21
+references:
+  - https://github.com/Bedrock-Safeguard/gentlemen-decryptor
+tags:
+  - attack.defense_evasion
+  - attack.t1562.001
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_img:
+    Image|endswith:
+      - '\powershell.exe'
+      - '\pwsh.exe'
+      - '\cmd.exe'
+  selection_cmd:
+    CommandLine|contains|all:
+      - 'Add-MpPreference'
+      - '-ExclusionProcess'
+  # Narrow to Gentlemen-adjacent binary names to reduce false positives
+  selection_binary:
+    CommandLine|contains:
+      - 'hapvida'
+      - 'donavmp'
+      - 'gentle'
+      - 'alutech.exe'
+      - 'thegentlemansransomware'
+      - 'gentlemen.bmp'
+  condition: selection_img and selection_cmd and selection_binary
+falsepositives:
+  - Legitimate IT admin adding AV exclusions (should not match binary list)
+level: high

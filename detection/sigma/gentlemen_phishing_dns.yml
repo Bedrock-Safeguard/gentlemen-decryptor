@@ -1,0 +1,100 @@
+title: The Gentlemen Ransomware — Phishing Apex DNS Query
+id: a1b2c3d4-e5f6-4789-8a1b-2c3d4e5f6789
+status: experimental
+description: |
+  DNS resolution of any of the 26 apex zones used by The Gentlemen's
+  phishing/mail botnet. Each apex hosts dozens of Faker-library surname
+  subdomains (kautzer, pacocha, zieme, emmerich, bogan, towne, schaefer,
+  etc.) that rotate frequently — so we match at the apex level.
+author: Bedrock Safeguard Inc.
+date: 2026-04-21
+references:
+  - https://github.com/Bedrock-Safeguard/gentlemen-decryptor
+tags:
+  - attack.command_and_control
+  - attack.t1071.004
+  - attack.initial_access
+  - attack.t1566.002
+logsource:
+  category: dns
+  product: windows
+detection:
+  selection:
+    QueryName|endswith:
+      - '.stieglers.net'
+      - '.isgedr.org'
+      - '.leprended.com'
+      - '.soflermance.com'
+      - '.zhongshengshijia.com'
+      - '.pwtr.art'
+      - '.s-hennebach.de'
+      - '.mymobilityltd.co.uk'
+      - '.iggytheillustrator.co.uk'
+      - '.farmacymru.org.uk'
+      - '.saveloyfactory.co.uk'
+      - '.southbucksbridgecentre.co.uk'
+      - '.betapictures.us'
+      - '.1stafricanclothing.com'
+      - '.larsbormann.de'
+      - '.tottimeths.org.uk'
+      - '.tigersafari.us'
+      - '.cdbattery.org'
+      - '.tomisho.info'
+      - '.caterham.pro'
+      - '.norc-us.org'
+      - '.butternutpeeler.com'
+      - '.a-bit-z.de'
+      - '.lewesjoinery.co.uk'
+      - '.plumbline.org.uk'
+      - '.lugwash.org'
+    QueryName:
+      - 'stieglers.net'
+      - 'isgedr.org'
+      - 'leprended.com'
+      - 'soflermance.com'
+      - 'zhongshengshijia.com'
+      - 'pwtr.art'
+      - 's-hennebach.de'
+      - 'mymobilityltd.co.uk'
+      - 'iggytheillustrator.co.uk'
+      - 'farmacymru.org.uk'
+      - 'saveloyfactory.co.uk'
+      - 'southbucksbridgecentre.co.uk'
+      - 'betapictures.us'
+      - '1stafricanclothing.com'
+      - 'larsbormann.de'
+      - 'tottimeths.org.uk'
+      - 'tigersafari.us'
+      - 'cdbattery.org'
+      - 'tomisho.info'
+      - 'caterham.pro'
+      - 'norc-us.org'
+      - 'butternutpeeler.com'
+      - 'a-bit-z.de'
+      - 'lewesjoinery.co.uk'
+      - 'plumbline.org.uk'
+      - 'lugwash.org'
+  condition: selection
+falsepositives:
+  - Some apex zones appear to be squatted/typo-similar to legitimate small-business sites; legitimate visits from non-targeted users would be rare but possible. Prioritise alerts from corporate endpoints that received phishing mail.
+level: high
+---
+title: The Gentlemen Ransomware — Leak Site DNS Query (.onion)
+id: 5f8e9d2c-4b1a-4d3e-9a7f-0c1b2d3e4f5a
+status: experimental
+description: |
+  Detects Tor DNS queries (via DoH/DoT leak, misconfigured client, or
+  browser resolver) for the Gentlemen leak site — indicates a victim
+  verifying their own listing or an attacker browsing from a compromised host.
+author: Bedrock Safeguard Inc.
+date: 2026-04-21
+logsource:
+  category: dns
+  product: windows
+detection:
+  selection:
+    QueryName|contains: 'tezwsse5czllksjb7cwp65rvnk4oobmzti2znn42i43bjdfd2prqqkad'
+  condition: selection
+falsepositives:
+  - Incident-response engagement verifying a listing
+level: critical

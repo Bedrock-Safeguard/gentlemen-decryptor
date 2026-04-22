@@ -1,0 +1,29 @@
+title: The Gentlemen Ransomware — Ransom Note or Encrypted File Footer
+id: b7a3d8c6-8a44-4d4b-9ff1-2c9e9b1d8c4a
+status: experimental
+description: |
+  Detects artifacts that confirm Gentlemen execution: the README-GENTLEMEN
+  ransom note file, or any file whose name ends in the distinctive encrypted
+  footer extensions (--fast--, --ultra--, --super--).
+author: Bedrock Safeguard Inc.
+date: 2026-04-21
+references:
+  - https://github.com/Bedrock-Safeguard/gentlemen-decryptor
+  - https://github.com/Bedrock-Safeguard/gentlemen-decryptor/blob/main/yara/gentlemen.yar
+tags:
+  - attack.impact
+  - attack.t1486
+logsource:
+  category: file_event
+  product: windows
+detection:
+  selection_note:
+    TargetFilename|contains: 'README-GENTLEMEN'
+  selection_locker_bg:
+    TargetFilename|endswith: '\LOCKER_BACKGROUND'
+  selection_wallpaper:
+    TargetFilename|endswith: '\gentlemen.bmp'
+  condition: 1 of selection_*
+falsepositives:
+  - None known
+level: critical

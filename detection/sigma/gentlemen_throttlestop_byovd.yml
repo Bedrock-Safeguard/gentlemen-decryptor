@@ -1,0 +1,49 @@
+title: The Gentlemen Ransomware — ThrottleStop.sys BYOVD (CVE-2025-7771)
+id: f03b8174-42f7-4a59-8d8d-63f4ae1de0bd
+status: experimental
+description: |
+  The Gentlemen operators deploy the signed-but-vulnerable ThrottleStop.sys
+  driver (CVE-2025-7771) to disable EDR from kernel mode. Detects the driver
+  file being written to disk or loaded as a service — a ransomware-staging
+  precursor.
+author: Bedrock Safeguard Inc.
+date: 2026-04-21
+references:
+  - https://github.com/Bedrock-Safeguard/gentlemen-decryptor
+  - https://nvd.nist.gov/vuln/detail/CVE-2025-7771
+tags:
+  - attack.defense_evasion
+  - attack.t1068
+  - attack.t1562.001
+  - attack.t1014
+logsource:
+  category: driver_load
+  product: windows
+detection:
+  selection:
+    ImageLoaded|endswith: '\ThrottleStop.sys'
+  condition: selection
+falsepositives:
+  - Legitimate overclocking/undervolting of a CPU by an end user running ThrottleStop.exe — correlate with the signed parent process and the host's role (servers don't run ThrottleStop)
+level: critical
+---
+title: The Gentlemen Ransomware — ThrottleStop.sys Dropped to Disk
+id: 8d1c0f2a-0c91-4bfa-b6f8-57b81f2a1ce2
+status: experimental
+description: Catches ThrottleStop.sys being written outside of its normal install path.
+author: Bedrock Safeguard Inc.
+date: 2026-04-21
+logsource:
+  category: file_event
+  product: windows
+detection:
+  selection:
+    TargetFilename|endswith: '\ThrottleStop.sys'
+  filter:
+    TargetFilename|contains:
+      - '\Program Files\'
+      - '\Program Files (x86)\'
+  condition: selection and not filter
+falsepositives:
+  - User-side ThrottleStop install in a non-default path
+level: high

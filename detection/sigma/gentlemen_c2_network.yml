@@ -1,0 +1,36 @@
+title: The Gentlemen Ransomware — C2 Network Connection
+id: 0c4d2e8f-7b1c-4a2f-bd7e-9e0a1c4f6b33
+status: experimental
+description: |
+  Outbound connections from a corporate endpoint to any of the known Gentlemen
+  command-and-control or staging endpoints. Matches IPs confirmed as active
+  infrastructure in April 2026.
+author: Bedrock Safeguard Inc.
+date: 2026-04-21
+references:
+  - https://github.com/Bedrock-Safeguard/gentlemen-decryptor
+tags:
+  - attack.command_and_control
+  - attack.t1071
+  - attack.t1105
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  selection_c2:
+    DestinationIp:
+      # Confirmed live Cobalt Strike + SystemBC infrastructure (as of Apr 2026)
+      - '91.107.247.163'   # Cobalt Strike C2 (Hetzner, Germany)
+      - '45.86.230.112'    # SystemBC C2 (BlueVPS/Clouvider, US)
+      - '149.28.137.179'   # Vultr staging (Packagec.ps1 download source)
+      # Proton66 operator workstation cluster
+      - '176.120.22.52'    # Operator box WIN-C5JC3TKQR1P
+      - '176.120.22.127'   # Exposed affiliate toolkit
+      - '193.143.1.197'    # dev-1.secure.host mail operations
+      - '193.143.1.53'     # Operator WinRM host (WIN-SCRVBJS9FQ9)
+      - '91.212.166.229'   # Affiliate phishing panel (Werkzeug 3.1.6)
+      - '91.212.166.228'   # Operator Windows host (WIN-IRBNTFJFF9C)
+  condition: selection_c2
+falsepositives:
+  - None expected. These are dedicated bulletproof and operator-controlled hosts.
+level: critical

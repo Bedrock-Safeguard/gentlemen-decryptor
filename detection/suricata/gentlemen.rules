@@ -1,0 +1,171 @@
+# =============================================================================
+# The Gentlemen Ransomware — Suricata Rules
+# Bedrock Safeguard Inc. | CC0 1.0
+# Reference: https://github.com/Bedrock-Safeguard/gentlemen-decryptor
+# SID range: 3300000-3300099 (Bedrock Safeguard reservation)
+# =============================================================================
+
+# --- C2 and staging infrastructure (IP-based; update as infra rotates) -------
+
+alert ip $HOME_NET any -> [91.107.247.163,45.86.230.112,149.28.137.179] any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — outbound to known ransomware C2 / staging infra"; \
+   classtype:trojan-activity; sid:3300001; rev:1; \
+   reference:url,github.com/Bedrock-Safeguard/gentlemen-decryptor;)
+
+alert ip $HOME_NET any -> [176.120.22.0/24,193.143.1.0/24,91.212.166.0/24,45.134.26.0/24] any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — outbound to Proton66 operator subnet cluster"; \
+   classtype:trojan-activity; sid:3300002; rev:1; \
+   reference:url,github.com/Bedrock-Safeguard/gentlemen-decryptor;)
+
+# --- SystemBC SOCKS5 signature (port 4001) ----------------------------------
+
+alert tcp $HOME_NET any -> 45.86.230.112 4001 \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — SystemBC SOCKS5 to known C2"; \
+   flow:to_server,established; \
+   classtype:trojan-activity; sid:3300003; rev:1;)
+
+# --- Staging download from Packagec.ps1 ------------------------------------
+
+alert http $HOME_NET any -> $EXTERNAL_NET any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — Packagec.ps1 staging download (Dvx.zip)"; \
+   flow:established,to_server; http.method; content:"GET"; \
+   http.uri; content:"/a/Dvx.zip"; nocase; \
+   http.host; content:"149.28.137.179"; \
+   classtype:trojan-activity; sid:3300004; rev:1;)
+
+# --- TLS cert subject pivot (dev-1.secure.host) ----------------------------
+
+alert tls $HOME_NET any -> $EXTERNAL_NET any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — TLS to Proton66 operator dev-1.secure.host cert"; \
+   tls.cert_subject; content:"CN=dev-1.secure.host"; \
+   classtype:trojan-activity; sid:3300005; rev:1;)
+
+# --- TLS SNI for leak site -------------------------------------------------
+
+alert tls $HOME_NET any -> $EXTERNAL_NET any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — Tor SNI leak site (tezwsse5…onion)"; \
+   tls.sni; content:"tezwsse5czllksjb7cwp65rvnk4oobmzti2znn42i43bjdfd2prqqkad.onion"; nocase; \
+   classtype:bad-unknown; sid:3300006; rev:1;)
+
+# --- Phishing apex DNS queries (26 apexes) ---------------------------------
+
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"stieglers.net";   nocase; endswith; classtype:bad-unknown; sid:3300010; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"isgedr.org";      nocase; endswith; classtype:bad-unknown; sid:3300011; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"leprended.com";   nocase; endswith; classtype:bad-unknown; sid:3300012; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"soflermance.com"; nocase; endswith; classtype:bad-unknown; sid:3300013; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"zhongshengshijia.com"; nocase; endswith; classtype:bad-unknown; sid:3300014; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"pwtr.art";        nocase; endswith; classtype:bad-unknown; sid:3300015; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"s-hennebach.de";  nocase; endswith; classtype:bad-unknown; sid:3300016; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"mymobilityltd.co.uk"; nocase; endswith; classtype:bad-unknown; sid:3300017; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"iggytheillustrator.co.uk"; nocase; endswith; classtype:bad-unknown; sid:3300018; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"farmacymru.org.uk"; nocase; endswith; classtype:bad-unknown; sid:3300019; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"saveloyfactory.co.uk"; nocase; endswith; classtype:bad-unknown; sid:3300020; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"southbucksbridgecentre.co.uk"; nocase; endswith; classtype:bad-unknown; sid:3300021; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"betapictures.us"; nocase; endswith; classtype:bad-unknown; sid:3300022; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"1stafricanclothing.com"; nocase; endswith; classtype:bad-unknown; sid:3300023; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"larsbormann.de"; nocase; endswith; classtype:bad-unknown; sid:3300024; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"tottimeths.org.uk"; nocase; endswith; classtype:bad-unknown; sid:3300025; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"tigersafari.us"; nocase; endswith; classtype:bad-unknown; sid:3300026; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"cdbattery.org"; nocase; endswith; classtype:bad-unknown; sid:3300027; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"tomisho.info"; nocase; endswith; classtype:bad-unknown; sid:3300028; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"caterham.pro"; nocase; endswith; classtype:bad-unknown; sid:3300029; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"norc-us.org"; nocase; endswith; classtype:bad-unknown; sid:3300030; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"butternutpeeler.com"; nocase; endswith; classtype:bad-unknown; sid:3300031; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"a-bit-z.de"; nocase; endswith; classtype:bad-unknown; sid:3300032; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"lewesjoinery.co.uk"; nocase; endswith; classtype:bad-unknown; sid:3300033; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"plumbline.org.uk"; nocase; endswith; classtype:bad-unknown; sid:3300034; rev:1;)
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS query to known phishing-botnet apex"; \
+   dns.query; content:"lugwash.org"; nocase; endswith; classtype:bad-unknown; sid:3300035; rev:1;)
+
+# --- Gentlemen leak site DNS (Tor DNS leak / DoH resolvers) ----------------
+
+alert dns $HOME_NET any -> any any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — DNS/DoH query for leak site .onion"; \
+   dns.query; content:"tezwsse5czllksjb7cwp65rvnk4oobmzti2znn42i43bjdfd2prqqkad"; nocase; \
+   classtype:trojan-activity; sid:3300050; rev:1;)
+
+# --- HTTP Server fingerprint for affiliate phishing panel -------------------
+
+alert http $EXTERNAL_NET any -> $HOME_NET any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — response from Werkzeug/3.1.6 Python/3.11.9 affiliate panel"; \
+   flow:established,from_server; \
+   http.server; content:"Werkzeug/3.1.6 Python/3.11.9"; nocase; \
+   classtype:trojan-activity; sid:3300060; rev:1;)
+
+alert http $EXTERNAL_NET any -> $HOME_NET any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — response from Werkzeug/3.1.8 Python/3.9.25 C2 panel"; \
+   flow:established,from_server; \
+   http.server; content:"Werkzeug/3.1.8 Python/3.9.25"; nocase; \
+   classtype:trojan-activity; sid:3300061; rev:1;)
+
+# --- Mail server banner fingerprint ----------------------------------------
+
+alert smtp $EXTERNAL_NET any -> $HOME_NET any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — banner from stieglers.net mail node"; \
+   flow:established,from_server; \
+   content:"220 mail.stieglers.net ESMTP"; nocase; \
+   classtype:trojan-activity; sid:3300070; rev:1;)
+
+alert smtp $EXTERNAL_NET any -> $HOME_NET any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — banner from dev-1.secure.host Exim operator node"; \
+   flow:established,from_server; \
+   content:"dev-1.secure.host ESMTP Exim 4.94.2"; nocase; \
+   classtype:trojan-activity; sid:3300071; rev:1;)
+
+# --- Encrypted file marker (rare — typically seen in file-copy / backup scans)
+
+alert tcp $HOME_NET any -> $EXTERNAL_NET any \
+  (msg:"BEDROCK-SAFEGUARD Gentlemen — --marker--GENTLEMEN footer exfiltration"; \
+   flow:established,to_server; content:"--marker--GENTLEMEN"; nocase; \
+   classtype:trojan-activity; sid:3300080; rev:1;)

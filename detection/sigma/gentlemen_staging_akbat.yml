@@ -1,0 +1,39 @@
+title: The Gentlemen Ransomware — Staging (AK.bat + Packagec.ps1)
+id: 9e7e3c4a-6d1b-4ea6-8b70-7e4ea4b6b0a1
+status: experimental
+description: |
+  Detects the staging phase of The Gentlemen ransomware, which drops an AK.bat
+  launcher that executes Packagec.ps1 with a hidden window. Packagec.ps1 then
+  downloads Dvx.zip from the Vultr staging IP and installs persistence as
+  UpdateApp.bat in the user Startup folder.
+author: Bedrock Safeguard Inc.
+date: 2026-04-21
+references:
+  - https://github.com/Bedrock-Safeguard/gentlemen-decryptor
+  - https://www.bleepingcomputer.com/news/security/the-gentlemen-ransomware/
+tags:
+  - attack.execution
+  - attack.t1059.001
+  - attack.t1059.003
+  - attack.command_and_control
+  - attack.t1105
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_img:
+    Image|endswith:
+      - '\cmd.exe'
+      - '\powershell.exe'
+      - '\pwsh.exe'
+  selection_cmd:
+    CommandLine|contains:
+      - 'AK.bat'
+      - 'Packagec.ps1'
+      - 'UpdateApp.bat'
+      - '149.28.137.179/a/Dvx.zip'
+      - 'Dvx.zip'
+  condition: selection_img and selection_cmd
+falsepositives:
+  - None known. File names are unusual and the URL is distinctive.
+level: high
